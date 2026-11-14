@@ -1,0 +1,6 @@
+numpy
+xarray
+zarr>=3
+obstore
+google-auth
+requests

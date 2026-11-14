@@ -1,0 +1,16 @@
+site/data/
+__pycache__/
+*.pyc
+node_modules/
+
+# local Python environment
+venv/
+.venv/
+
+# never commit secrets (the Google service-account key belongs in GitHub Actions secrets only)
+.env
+.env.*
+*service-account*.json
+*-key.json
+credentials*.json
+application_default_credentials.json
