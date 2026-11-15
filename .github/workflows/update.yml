@@ -29,17 +29,23 @@ jobs:
       - name: Test
         run: python tests/test_fronts.py && node tests/test_lib.js
 
+      # WeatherNext model layers are switched on by setting the repo variable ENABLE_WEATHERNEXT to "true"
+      # (Settings > Secrets and variables > Actions > Variables), once Google has approved the service account.
       - name: Authenticate to Google Cloud
+        if: vars.ENABLE_WEATHERNEXT == 'true'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-      - name: Build data files
+      - name: Build fronts data (public NOAA/NWS data)
         run: |
           mkdir -p site/data
           python scripts/fronts.py --out site/data/fronts.json
-          python scripts/generate_data.py --out site/data
+
+      - name: Build WeatherNext model data
+        if: vars.ENABLE_WEATHERNEXT == 'true'
+        run: python scripts/generate_data.py --out site/data
 
       # Publish only the finished site to the `deploy` branch (one fresh commit each run, so the
       # repo history doesn't fill with data files). Render serves that branch.

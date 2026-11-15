@@ -318,9 +318,11 @@
       slider.value = hi;
       await showHour(hi);
     } catch (e) {
-      notes.push(`<span class="stale">Model layers unavailable: ${e.message}</span>`);
-      $("chk-temp").checked = false; $("chk-temp").disabled = true; $("chk-dew").disabled = true;
-      $("hour").disabled = true; $("when").textContent = "No model data";
+      // No model data published (the site runs on public NOAA/NWS data only): hide the model controls.
+      [$("chk-temp"), $("chk-dew")].forEach((c) => { c.checked = false; c.closest(".layer").style.display = "none"; });
+      [$("when").parentElement, $("hour"), $("match"), $("opacity").parentElement].forEach((el) => { el.style.display = "none"; });
+      if (!new URLSearchParams(location.hash.slice(1)).has("layers")) $("chk-radar").checked = true;
+      $("foot-src").textContent = "Sources: NOAA/NWS Weather Prediction Center \u00b7 NOAA/NWS radar";
     }
     if (state.manifest) { setLayer("temp", $("chk-temp").checked); setLayer("dew", $("chk-dew").checked); }
 
@@ -344,8 +346,12 @@
     if ($("chk-fronts").checked) layers.fronts.addTo(map);
     setRadar($("chk-radar").checked);
 
-    notes.push("Fronts are the NWS analysis, not model output. Model fields are a 64-member ensemble mean, so they are smoother than any single forecast.");
-    notes.push("Radar is live NOAA observations and does not follow the forecast-hour slider. Data: Google DeepMind WeatherNext 3; NOAA/NWS Weather Prediction Center; NOAA/NWS radar.");
+    if (state.manifest) {
+      notes.push("Fronts are the NWS analysis, not model output. Model fields are a 64-member ensemble mean, so they are smoother than any single forecast.");
+      notes.push("Radar is live NOAA observations and does not follow the forecast-hour slider. Data: Google DeepMind WeatherNext 3; NOAA/NWS Weather Prediction Center; NOAA/NWS radar.");
+    } else {
+      notes.push("Fronts are the NWS Weather Prediction Center analysis. Radar is live NOAA observations. Experimental, for general interest only; not for safety decisions. Use weather.gov for official forecasts and warnings.");
+    }
     $("status").innerHTML = notes.join("<br>");
   }
   boot();
