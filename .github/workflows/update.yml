@@ -6,7 +6,8 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: write    # push the deploy branch
+  id-token: write    # lets the job prove its identity to Google (no stored key)
 
 concurrency:
   group: update-map
@@ -31,11 +32,10 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Build data files
-        env:
-          GCP_BILLING_PROJECT: ${{ secrets.GCP_BILLING_PROJECT }}
         run: |
           mkdir -p site/data
           python scripts/fronts.py --out site/data/fronts.json

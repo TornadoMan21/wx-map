@@ -87,8 +87,11 @@ def make_store(prefix: str | None = None):
     from obstore.store import GCSStore
     kwargs = {"prefix": prefix} if prefix else {}
     try:
+        import google.auth
         from obstore.auth.google import GoogleCredentialProvider
-        return GCSStore(STATS_BUCKET, credential_provider=GoogleCredentialProvider(), **kwargs)
+        # Ask for scopes explicitly: impersonated / federated logins (used by the GitHub job) need them.
+        creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+        return GCSStore(STATS_BUCKET, credential_provider=GoogleCredentialProvider(creds), **kwargs)
     except Exception:
         return GCSStore(STATS_BUCKET, skip_signature=True, **kwargs)
 

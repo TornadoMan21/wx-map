@@ -4,3 +4,4 @@ zarr>=3
 obstore
 google-auth
 requests
+dask
